@@ -6,13 +6,13 @@ class Room(val name:String,val description:String,val location:Int,private var i
   def describe():String={
     println(description)
   }
-  def getExit(dir:Int):Option[Room]{=
-    if(exits(dir)==-1) None else Some[exits(dir)] //returns None, or the room location in given direction
+  def getExit(dir:Int):Option[Room]={
+    if(exits(dir)==-1) None else Some(exits(dir)) //returns None, or the room location in given direction
   }
     def addItem(item:Item):Unit={
       ???//add to the list of items in room
     }
-  }
+  
 
 object Room{
   val rooms=getRooms()

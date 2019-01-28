@@ -11,8 +11,8 @@ class Player(name:String, description:String, private var location:Int, private 
       println("You don't have that item!")
     } else{
       println("You dropped your "+name+".")
-      Room.addItem(name)
-      ???//add to list of items in room
+      var toDrop=inventory.filter(_.name==name)
+      rooms(location).addItem(toDrop)
       inventory=newInv
     }
   }
@@ -26,7 +26,7 @@ class Player(name:String, description:String, private var location:Int, private 
 
 object Player{
   def initPlayer():Player={
-    println("What's your name?\m")
+    println("What's your name?\n")
 		val name=readLine
 		println("Describe yourself or your character.\n")
 		val description=readLine
