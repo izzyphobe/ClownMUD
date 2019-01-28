@@ -3,7 +3,7 @@ import scala.io.StdIn
 import scala.io.Source
 
 class Room(val name:String,val description:String,val location:Int,private var items:List[Item], val exits:Array[Int]){
-  def description():String={
+  def describe():String={
     println(description)
   }
   def getExit(dir:Int):Option[Room]{=
@@ -15,7 +15,7 @@ class Room(val name:String,val description:String,val location:Int,private var i
   }
 
 object Room{
-  val rooms=readRooms()
+  val rooms=getRooms()
   def readRoom(rooms:Iterator[String]):Room={
     val location=rooms.next
     val name=rooms.next

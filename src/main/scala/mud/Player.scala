@@ -20,7 +20,7 @@ class Player(name:String, description:String, private var location:Int, private 
     ???
   }
   def move(dir:String):Unit={
-    
+    ???
   }
 }
 
@@ -32,6 +32,6 @@ object Player{
 		val description=readLine
 		val location=0
 		val inventory=List(Item("Sharp pencil","You could probably kill someone with this if you had the stamina."),Item("Catcher's glove", "You hate baseball, but the gloves make for good armor."))
-		new Player(name, description, location, inventory)
+		val player=new Player(name, description, location, inventory)
   }
 }
