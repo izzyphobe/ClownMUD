@@ -1,4 +1,5 @@
-package mud
+/*
+*package mud
 
 class Player(name:String, description:String, private var location:Int, private var inventory:List[Item]){
   def processCommand(cmd:String)={
@@ -20,7 +21,7 @@ class Player(name:String, description:String, private var location:Int, private 
     ???
   }
   def dropItem(name:String):Unit={
-    
+    ???
   }
   def move(dir:String):Unit={
     ???
@@ -43,3 +44,4 @@ object Player{
     player
   }
 }
+*/
