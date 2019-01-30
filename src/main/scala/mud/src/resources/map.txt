@@ -1,31 +1,33 @@
 4
 0
-Room 0 name
-Room 0 description
-2
-Item one
-Item one description
-Item two
-Item two description
-1,2,3,100,100,100
+Honksley Hall
+The hub of all student activity. Students are bustling to get to their next Glass (Goofy Class).
 1
-Room 1 name
-Room 1 description
+Red Nose
+Someone dropped their nose. Oh well, finders keepers, amirite?
+1,3,2,100,100,100
 1
-Item one
-Item one description
+Computer Lab
+Millions of computers are lined up. Millions. Clown college has gotten more and more popular since the most recent mass extinction event.
+3
+Crumpled up gum wrapper
+Smells like juicy fruit. Mmmm...
+Floppy disk
+Who put this here? Was this someone's idea of a joke? This may be clown college, but that is NOT funny.
+A copy of E.T. for the Atari 2600
+Based on the film of the same name. Released in 1982 never to be seen again.
 100,0,100,100,100,100
 2
-room 2 name
-room 2 desc
+Darkened Hallway
+A faint droning can be heard. It sounded like it was miles away, but as soon as you stepped foot in the hallway, it seemed to be right by your ear.
 1
-item 1
-item 1 desc
+Whoopie cushion
+Someone wrote 'TURN ME OVER' in blood on it. You turn it over. The other side says 'GOTCHA', also written in blood. Classy.
 1,3,100,100,100,100
 3
-room 3 name
-room 3 desc
+Bathroom
+The stalls are arranged in a circle. In the center, there are ten sinks, each a different color of the rainbow. Carousel music is playing. After a few seconds, you realize the whole thing is spinning.
 1
-item 1
-item 1 desc
+Broken hacky sack
+Its innards are leaking out.
 2,100,100,100,100,100

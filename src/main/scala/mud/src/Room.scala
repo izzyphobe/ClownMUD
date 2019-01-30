@@ -4,37 +4,46 @@ import scala.io.Source
 
 class Room(val name:String,val description:String,val location:Int,var items:List[Item], val exits:Array[Int]){
   def describe():Unit={
-    var printitems=""
-    for(item<-items){
-      printitems=printitems+item.name+"\n ||"+item.desc+"\n"
+    println("You are in "+name+"\n"+description)
+    if(items.length!=0){
+      var printitems=""
+      for(item<-items){
+        printitems=printitems+item.name+"\n ||"+item.desc+"\n"
+      }
+      println("\n\n"+"You notice the following item(s):\n\n"+printitems)
     }
-    println("You are in room:"+name+"\n"+description+"\n\n"+"You notice the following items:\n\n"+printitems)
+
     var printExits="\nYou see the following exit(s):\n\n"
-    
-    for(n<-exits){
-      var m=n-1
-      if(m!=99){
-        if(m==0){
-          printExits=printExits+"To the North: "+Room.rooms(n).name
+    var n=0
+
+    while(n<6){
+      if(exits(n)!=100){
+        if(n==0){
+          printExits=printExits+"To the North: "+Room.rooms(exits(n)).name+"\n"
         }
-        else if(m==1){
-          printExits=printExits+"To the South: "+Room.rooms(n).name
+        else if(n==1){
+          printExits=printExits+"To the South: "+Room.rooms(exits(n)).name+"\n"
         }
-        else if(m==2){
-          printExits=printExits+"To the East: "+Room.rooms(n).name
+        else if(n==2){
+          printExits=printExits+"To the East: "+Room.rooms(exits(n)).name+"\n"
         }
-        else if(m==3){
-          printExits=printExits+"To the West:" +Room.rooms(n).name
+        else if(n==3){
+          printExits=printExits+"To the West:" +Room.rooms(exits(n)).name+"\n"
         }
-        else if(m==4){
-          printExits=printExits+"Up: "+Room.rooms(n).name
+        else if(n==4){
+          printExits=printExits+"Up: "+Room.rooms(exits(n)).name+"\n"
+        }
+        else if(n==5){
+          printExits=printExits+"Down:"+Room.rooms(exits(n)).name+"\n"
         }
         else{
-          printExits=printExits+"Down:"+Room.rooms(n).name
+          printExits=printExits+"\n"
         }
-        printExits=printExits+"\n"
       }
-      printExits
+     else{
+        printExits=printExits+""
+      }
+     n+=1
     }
     
     println(printExits)
