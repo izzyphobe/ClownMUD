@@ -1,8 +1,9 @@
 package mud
 import scala.io.StdIn
 
-class Player(name:String, description:String, private var location:Int, private var inventory:List[Item]){
+class Player(name:String,description:String, private var location:Int, private var inventory:List[Item]){
   def parseCommand(cmd:String):Unit={
+    println
       if(cmd=="s"||cmd=="n"||cmd=="e"||cmd=="w"||cmd=="u"||cmd=="d"){
 		    move(cmd)
 		  }
@@ -23,25 +24,27 @@ class Player(name:String, description:String, private var location:Int, private 
 		  else{
 		    println("Invalid command! Type 'help' for a list of all available commands.")
 		  }
+		  println
 
   }
   def dropItem(name:String):Unit={
     
-    var newInv=inventory.filterNot(_.name==name)
+    var newInv=inventory.filterNot(_.name.toLowerCase==name.toLowerCase)
     if(newInv.length==inventory.length){
       println("You don't have that item!")
     } else{
       println("You dropped your "+name+".")
-      var toDrop=inventory.filter(_.name==name)
+      var toDrop=inventory.filter(_.name.toLowerCase==name.toLowerCase)
       Room.rooms(location).addItem(toDrop(0))
       inventory=newInv
     }
   }
   def getItem(name:String):Unit={
-    val toGet=Room.rooms(location).items.filter(_.name==name)
-    val newRoomInv=Room.rooms(location).items.filterNot(_.name==name)
+    val toGet=Room.rooms(location).items.filter(_.name.toLowerCase==name.toLowerCase)
+    val newRoomInv=Room.rooms(location).items.filterNot(_.name.toLowerCase==name.toLowerCase)
     Room.rooms(location).items=newRoomInv
     inventory=inventory:+toGet(0)
+    println("You grabbed: "+toGet(0).name)
   }
   def move(d:String):Unit={
     val dir=d.trim
@@ -70,7 +73,7 @@ class Player(name:String, description:String, private var location:Int, private 
   def printInv():Unit={
     var toPrint=""
     for(item<-inventory){
-      toPrint=toPrint+item.name+"\n     "+item.desc+"\n"
+      toPrint=toPrint+item.name+"\n||"+item.desc+"\n\n"
     }
     println(toPrint)
   }
@@ -82,7 +85,7 @@ object Player{
     println("What's your name?\n")
 		val name=readLine()
 		println("Describe yourself or your character.\n")
-		val description=readLine
+		val description=readLine()
 		val location=0
 		val inventory=List(Item("Sharp pencil","You could probably kill someone with this if you had the stamina."),Item("Catcher's glove", "You hate baseball, but the gloves make for good armor."))
 		val player=new Player(name, description, location, inventory)

@@ -6,31 +6,31 @@ class Room(val name:String,val description:String,val location:Int,var items:Lis
   def describe():Unit={
     var printitems=""
     for(item<-items){
-      printitems=printitems+item.name+"\n ==="+item.desc+"==="
+      printitems=printitems+item.name+"\n ||"+item.desc+"\n"
     }
-    println("You are in room:"+name+"\n"+description+"\n"+"You notice the following items:\n"+printitems)
-    var printExits="\n You see the following exit(s): "
+    println("You are in room:"+name+"\n"+description+"\n\n"+"You notice the following items:\n\n"+printitems)
+    var printExits="\nYou see the following exit(s):\n\n"
     
-    for(exit<-exits){
-      if(exits(exit)!=(-1)){
-        printExits=printExits+Room.rooms(exit).name
-        if(exit==0){
-          printExits=printExits+" to the North"
+    for(n<-exits){
+      var m=n-1
+      if(m!=99){
+        if(m==0){
+          printExits=printExits+"To the North: "+Room.rooms(n).name
         }
-        else if(exit==1){
-          printExits=printExits+" to the South "
+        else if(m==1){
+          printExits=printExits+"To the South: "+Room.rooms(n).name
         }
-        else if(exit==2){
-          printExits=printExits+" to the East "
+        else if(m==2){
+          printExits=printExits+"To the East: "+Room.rooms(n).name
         }
-        else if(exit==3){
-          printExits=printExits+" to the West "
+        else if(m==3){
+          printExits=printExits+"To the West:" +Room.rooms(n).name
         }
-        else if(exit==4){
-          printExits=printExits+" up"
+        else if(m==4){
+          printExits=printExits+"Up: "+Room.rooms(n).name
         }
         else{
-          printExits=printExits+" down"
+          printExits=printExits+"Down:"+Room.rooms(n).name
         }
         printExits=printExits+"\n"
       }
@@ -58,7 +58,7 @@ object Room{
     new Room(name, description,location.toInt, items, exits)
   }
   def getRooms():Array[Room]={
-    val source=Source.fromFile("map.txt")
+    val source=Source.fromFile("src/main/scala/mud/src/resources/map.txt")
     val map=source.getLines()
     val rooms=Array.fill(map.next.toInt)(readRoom(map))
     source.close()
