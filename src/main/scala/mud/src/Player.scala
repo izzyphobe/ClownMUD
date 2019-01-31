@@ -19,13 +19,10 @@ class Player(name:String,description:String, private var location:Int, private v
 		    dropItem(toDrop)
 		  }else if(cmd=="help"){
 		    println("COMMANDS: \n \n n, s, e, w, u, d - moves player \n \n look - reprints description of current room \n inv - lists current inventory \n get [item] - grab item from the room and add to your inventory \n drop [item] - drops an item from your inventory and puts it in the room \n exit - exits the game. Your data will not be saved. It is worth nothing.")
-		  }
-		
-		  else{
+		  }else{
 		    println("Invalid command! Type 'help' for a list of all available commands.")
 		  }
 		  println
-
   }
   def dropItem(name:String):Unit={
     var newInv=inventory.filterNot(_.name.toLowerCase==name.toLowerCase)
@@ -92,15 +89,13 @@ class Player(name:String,description:String, private var location:Int, private v
       println(toPrint)
     }
   }
-
 }
-
 object Player{
   def initPlayer():Player={
     println("What's your clown name?\n")
-		val name=readLine()
+		val name=readLine
 		println("\nWhat's your backstory?\n")
-		val description=readLine()
+		val description=readLine
 		println("\nNice. I'm Chad. My clown name is Chaddington III. Good to meet you bro.\nAlright, my first class is starting soon. See ya!\n")
 		println("[CHADDINGTON III waves goodbye. He has on a Gucci eyepatch. You don't want to ask questions.]")
 		val location=0

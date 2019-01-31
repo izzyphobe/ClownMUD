@@ -12,6 +12,9 @@ class Room(val name:String,val description:String,val location:Int,var items:Lis
       }
       println("\n\n"+"You notice the following item(s):\n\n"+printitems)
     }
+    else{
+      println("\n\nThere are no items in the room.\n\n")
+    }
 
     var printExits="\nYou see the following exit(s):\n\n"
     var n=0
