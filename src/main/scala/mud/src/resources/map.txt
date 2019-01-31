@@ -1,11 +1,11 @@
-4
+10
 0
 Honksley Hall
 The hub of all student activity. Students are bustling to get to their next Glass (Goofy Class).
 1
 Red Nose
 Someone dropped their nose. Oh well, finders keepers, amirite?
-1,3,2,100,100,100
+1,2,3,5,100,100
 1
 Computer Lab
 Millions of computers are lined up. Millions. Clown college has gotten more and more popular since the most recent mass extinction event.
@@ -23,7 +23,7 @@ A faint droning can be heard. It sounded like it was miles away, but as soon as 
 1
 Whoopie cushion
 Someone wrote 'TURN ME OVER' in blood on it. You turn it over. The other side says 'GOTCHA', also written in blood. Classy.
-1,3,100,100,100,100
+1,4,100,100,100,100
 3
 Bathroom
 The stalls are arranged in a circle. In the center, there are ten sinks, each a different color of the rainbow. Carousel music is playing. After a few seconds, you realize the whole thing is spinning.
@@ -31,3 +31,47 @@ The stalls are arranged in a circle. In the center, there are ten sinks, each a 
 Broken hacky sack
 Its innards are leaking out.
 2,100,100,100,100,100
+4
+Biology lab
+The stench of Clown Biology majors fills the air. These clowns are clownier than you'll ever be. You start to wonder if you'll really fit in here.
+2
+Clown skeleton
+You didn't realize clown skeletons looked different than human ones. Apparently they do.
+Educational Poster
+It says "CLOWN REPRODUCTION" in huge letters. The diagram depicts the trajectory of a pie being hurled at a clown.
+2,100,100,100,100,100
+5
+Jester's Courtyard
+It's cold outside. It makes your clown makeup itch a lot. This must be the main outside area - clowns are walking and running and hand-walking and hand-running and headstanding and juggling and brandishing pies everywhere. You realize this might be the right place for you after all.
+2
+Banjo
+Someone left their banjo. It looks expensive.
+Custard Pie
+A classic.
+100,100,0,6,100,100
+6
+Clown Containment Units - 1st Floor
+You enter the first floor of the student housing. Each dorm room door is a different color of the rainbow. You're on the third floor - room 323b.
+1
+Cookie
+Oatmeal raisin. Hmm... That's the least silly cookie out there! This has no business being at clown college. You might turn this in to security - the perp could be suspended.
+100,100,5,100,7,100
+7
+Clown Containment Units - 2nd Floor
+You take the elevator up. These doors aren't colored as brightly... Something feels off.
+1
+???
+It's gooey...
+100,100,100,100,8,6
+8
+Clown Containment Units - 3rd Floor
+You take the elevator up. These doors... They're metal, and spaced only one foot apart. This isn't right... This isn't right at all...
+1
+Piece of broken glass
+There's some custard on it. Something horrible has happened.
+100,100,9,100,100,7
+9
+Your dorm
+It's approximately 5 feet in width, and goes 10 feet deep. Not huge, but at least you're in a single!
+0
+100,100,100,8,100,100

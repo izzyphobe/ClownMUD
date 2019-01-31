@@ -72,10 +72,10 @@ class Player(name:String,description:String, private var location:Int, private v
       toGo=Room.rooms(location).exits(3)
     }else if(dir=="u"){
       toGo=Room.rooms(location).exits(4)
-    }else{
+    }else if(dir=="d"){
       toGo=Room.rooms(location).exits(5)
     }
-    if(toGo>6){
+    if(toGo==100){
       println("There is no exit that way.")
     }
     else{

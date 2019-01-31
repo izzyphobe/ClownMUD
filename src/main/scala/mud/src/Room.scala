@@ -28,13 +28,13 @@ class Room(val name:String,val description:String,val location:Int,var items:Lis
           printExits=printExits+"To the East: "+Room.rooms(exits(n)).name+"\n"
         }
         else if(n==3){
-          printExits=printExits+"To the West:" +Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"To the West: " +Room.rooms(exits(n)).name+"\n"
         }
         else if(n==4){
           printExits=printExits+"Up: "+Room.rooms(exits(n)).name+"\n"
         }
         else if(n==5){
-          printExits=printExits+"Down:"+Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"Down: "+Room.rooms(exits(n)).name+"\n"
         }
         else{
           printExits=printExits+"\n"
