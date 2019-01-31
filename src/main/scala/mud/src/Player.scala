@@ -28,19 +28,15 @@ class Player(name:String,description:String, private var location:Int, private v
 
   }
   def dropItem(name:String):Unit={
-    if(name.toLowerCase=="sharp pencil"){
-      println("You can't drop that! It's your only defense.")
-    }
-    else{
-      var newInv=inventory.filterNot(_.name.toLowerCase==name.toLowerCase)
-      if(newInv.length==inventory.length){
-        println("You don't have that item!")
-      }else{
-        println("You dropped your "+name+".")
-        var toDrop=inventory.filter(_.name.toLowerCase==name.toLowerCase)
-        Room.rooms(location).addItem(toDrop(0))
-        inventory=newInv
-      }
+    var newInv=inventory.filterNot(_.name.toLowerCase==name.toLowerCase)
+    if(newInv.length==inventory.length){
+      println("You don't have that item!")
+    }else{
+      println("You dropped your "+name+".")
+      var toDrop=inventory.filter(_.name.toLowerCase==name.toLowerCase)
+      Room.rooms(location).addItem(toDrop(0))
+      inventory=newInv
+    
     }
   }
   def getItem(name:String):Unit={
@@ -85,11 +81,16 @@ class Player(name:String,description:String, private var location:Int, private v
     }
   }
   def printInv():Unit={
-    var toPrint=""
-    for(item<-inventory){
-      toPrint=toPrint+item.name+"\n||"+item.desc+"\n\n"
+    if(inventory.length==0){
+      println("You don't have anything in your inventory! Type 'get [item name]' to grab something from the room.")
     }
-    println(toPrint)
+    else{
+      var toPrint=""
+      for(item<-inventory){
+        toPrint=toPrint+item.name+"\n||"+item.desc+"\n\n"
+      }
+      println(toPrint)
+    }
   }
 
 }
@@ -104,7 +105,7 @@ object Player{
 		println("[CHADDINGTON III waves goodbye. He has on a Gucci eyepatch. You don't want to ask questions.]")
 		val location=0
 		println("\nType 'look' to look around. Type 'help' to see more commands.")
-		val inventory=List(Item("Sharp pencil","You could probably kill someone with this if you had the stamina."),Item("Catcher's glove", "You hate baseball, but the gloves make for good clown-punching armor."))
+		val inventory=List(Item("Catcher's glove", "You hate baseball, but the gloves make for good clown-punching armor."))
 		val player=new Player(name, description, location, inventory)
     player
   }
