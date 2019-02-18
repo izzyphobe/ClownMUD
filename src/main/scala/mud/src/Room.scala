@@ -22,22 +22,22 @@ class Room(val name:String,val description:String,val location:Int,var items:Lis
     while(n<6){
       if(exits(n)!=100){
         if(n==0){
-          printExits=printExits+"To the North: "+Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"To the North: "+Room.rooms(exits(n))+"\n"
         }
         else if(n==1){
-          printExits=printExits+"To the South: "+Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"To the South: "+rooms.exits(n)+"\n"
         }
         else if(n==2){
-          printExits=printExits+"To the East: "+Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"To the East: "+Room.rooms(exits(n))+"\n"
         }
         else if(n==3){
-          printExits=printExits+"To the West: " +Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"To the West: " +Room.rooms(exits(n))+"\n"
         }
         else if(n==4){
-          printExits=printExits+"Up: "+Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"Up: "+Room.rooms(exits(n))+"\n"
         }
         else if(n==5){
-          printExits=printExits+"Down: "+Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"Down: "+Room.rooms(exits(n))+"\n"
         }
         else{
           printExits=printExits+"\n"
@@ -61,21 +61,21 @@ class Room(val name:String,val description:String,val location:Int,var items:Lis
 
 object Room{
   val rooms=getRooms()
-  def readRoom(rooms:Iterator[String]):Room={
+  def readRoom(rooms:Iterator[String]):(String,Room)={
     val location=rooms.next
     val name=rooms.next
     val description=rooms.next
     val items=List.fill(rooms.next.toInt)(Item(rooms.next,rooms.next))
     val exits=rooms.next.split(",").map(_.toInt)
-    new Room(name, description,location.toInt, items, exits)
+    (name, new Room(name, description,location.toInt, items, exits))
   }
-  def getRooms():Array[Room]={
+  def getRooms():Map[String, Room]={
     val source=Source.fromFile("src/main/scala/mud/src/resources/map.txt")
     val map=source.getLines()
     val rooms=Array.fill(map.next.toInt)(readRoom(map))
     source.close()
-    rooms
+    rooms.toMap
     
     }
 
-  }
+}

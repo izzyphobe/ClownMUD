@@ -12,6 +12,6 @@ object Main{
 		if(cmd.toLowerCase=="exit"){
 		  System.exit(0)
 		}
-	}
+  }
 }
 
