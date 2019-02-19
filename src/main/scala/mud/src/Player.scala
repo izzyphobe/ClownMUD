@@ -1,7 +1,7 @@
 package mud
 import scala.io.StdIn
 
-class Player(name: String, description: String, private var location: Int, private var inventory: List[Item]) {
+class Player(name: String, description: String, private var location: String, private var inventory: List[Item]) {
   def parseCommand(cmd: String): Unit = {
     println
     if (cmd == "s" || cmd == "n" || cmd == "e" || cmd == "w" || cmd == "u" || cmd == "d") {
@@ -52,7 +52,7 @@ class Player(name: String, description: String, private var location: Int, priva
   }
   def move(d: String): Unit = {
     val dir = d.trim
-    var toGo = (100)
+    var toGo = ("x")
     if (dir == "n") {
       toGo = Room.rooms(location).exits(0)
     } else if (dir == "s") {
@@ -66,7 +66,7 @@ class Player(name: String, description: String, private var location: Int, priva
     } else if (dir == "d") {
       toGo = Room.rooms(location).exits(5)
     }
-    if (toGo == 100) {
+    if (toGo == "x") {
       println("There is no exit that way.")
     } else {
       location = toGo
@@ -94,7 +94,7 @@ object Player {
     val description = readLine
     println("\nNice. I'm Chad. My clown name is Chaddington III. Good to meet you bro.\nAlright, my first class is starting soon. See ya!\n")
     println("[CHADDINGTON III waves goodbye. He has on a Gucci eyepatch. You don't want to ask questions.]")
-    val location = 0
+    val location = "Honksley_Hall"
     println("\nType 'look' to look around. Type 'help' to see more commands.")
     val inventory = List(Item("Catcher's glove", "You hate baseball, but the gloves make for good clown-punching armor."))
     val player = new Player(name, description, location, inventory)
