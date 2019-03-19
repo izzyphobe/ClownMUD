@@ -4,14 +4,15 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
 
+
 class RoomManager extends Actor {
   import RoomManager._
 	val rooms = readRooms()
 	for(room <- context.children) room ! Room.LinkExits(rooms)
 
   def receive = {
-	  case FirstRoom=>
-	    sender ! rooms("Honksley_Hall")
+	  case FirstRoom(room:ActorRef)=>
+	    sender ! PlayerManager.AddPlayer(room)
     case m => println("Ooops in RoomManager: " + m)
   }
 
@@ -22,6 +23,7 @@ class RoomManager extends Actor {
     source.close()
     rooms
   }
+  
   def firstRoom=rooms("Honksley_Hall")
   def readRoom(lines: Iterator[String]): (String, ActorRef) = {
     val keyword = lines.next
@@ -38,5 +40,5 @@ class RoomManager extends Actor {
 
 object RoomManager {
   import RoomManager._
-  case object FirstRoom
+  case class FirstRoom(room:ActorRef)
 }
