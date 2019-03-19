@@ -1,17 +1,14 @@
 package mud
 import scala.io.StdIn
+import akka.actor.ActorSystem
+import akka.actor.Props
 object Main{
+  val system=ActorSystem("MUD")
+  val roomManage=system.actorOf(Props(new RoomManager),"RoomManager")
+  val playerManage=system.actorOf(Props(new PlayerManager),"PlayerManager")
 	def main(args: Array[String]):Unit = {
-		println("\n\n\n\n\n\n\n\n\n\n\n\nHey, dude. Are you excited? First day of clown college!")
-    val player=Player.initPlayer()
-		var cmd=readLine
-		while(cmd!="exit"){
-		  player.parseCommand(cmd.toLowerCase)
-		  cmd=readLine
-		}
-		if(cmd.toLowerCase=="exit"){
-		  System.exit(0)
-		}
+	  playerManage ! PlayerManager.AddPlayer
+
   }
 }
 

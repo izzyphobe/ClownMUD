@@ -1,8 +1,40 @@
 package mud
 import scala.io.StdIn
 import scala.io.Source
+import akka.actor.Actor
+import akka.actor.ActorRef
 
-class Room(val name:String,val description:String,var items:List[Item], val exits:Array[String]){
+class Room(val name:String,val description:String,var items:List[Item], val exitKeys:Array[String]) extends Actor{
+  import Room._
+  private var exits:Array[Option[ActorRef]]=null
+  def receive={
+    case LinkExits(roomsMap)=>
+      exits=exitKeys.map(keyword=>roomsMap.get(keyword))
+    case GetName=>
+      sender ! name
+    case GetDescription =>
+      sender ! Player.PrintMessage(description)
+    case GetExit(dir) =>
+      sender ! Player.TakeExit(getExit(dir))
+    case GetItem(itemName) =>
+      sender ! Player.TakeItem(getItem(itemName))
+    case DropItem(item:String) =>
+      dropItem(item)
+
+    case m=> println("no! "+m)
+    
+  }
+  
+  def dropItem(item:String)={
+    items.filter(_.name==item)
+  }
+  def getItem(itemName:String):Item={
+    items.find(item=>item.name==itemName).get
+  }
+  def getExit(dir:Int):Option[ActorRef]={
+    exits(dir)
+  }
+  
   def describe():Unit={
     println("You are in "+name+"\n"+description)
     if(items.length!=0){
@@ -20,24 +52,24 @@ class Room(val name:String,val description:String,var items:List[Item], val exit
     var n=0
 
     while(n<6){
-      if(exits(n)!="x"){
+      if(exitKeys(n)!="x"){
         if(n==0){
-          printExits=printExits+"To the North: "+Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"To the North: "+ (exits(n).get ! GetName)+"\n"
         }
         else if(n==1){
-          printExits=printExits+"To the South: "+Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"To the South: "+(exits(n).get ! GetName)+"\n"
         }
         else if(n==2){
-          printExits=printExits+"To the East: "+Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"To the East: "+(exits(n).get ! GetName)+"\n"
         }
         else if(n==3){
-          printExits=printExits+"To the West: " +Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"To the West: " +(exits(n).get ! GetName)+"\n"
         }
         else if(n==4){
-          printExits=printExits+"Up: "+Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"Up: "+(exits(n).get ! GetName)+"\n"
         }
         else if(n==5){
-          printExits=printExits+"Down: "+Room.rooms(exits(n)).name+"\n"
+          printExits=printExits+"Down: "+(exits(n).get ! GetName)+"\n"
         }
         else{
           printExits=printExits+"\n"
@@ -49,7 +81,7 @@ class Room(val name:String,val description:String,var items:List[Item], val exit
      n+=1
     }
     
-    println(printExits)
+    sender ! Player.PrintMessage(printExits)
   }
 
  
@@ -60,22 +92,28 @@ class Room(val name:String,val description:String,var items:List[Item], val exit
 }
 
 object Room{
-  val rooms=getRooms()
-  def readRoom(rooms:Iterator[String]):(String,Room)={
-    val name=rooms.next
-    val description=rooms.next
-    val items=List.fill(rooms.next.toInt)(Item(rooms.next,rooms.next))
-    val exits=rooms.next.split(",")
-    val pname=name.replace("_"," ")
-    (name, new Room(pname, description, items, exits))
-  }
-  def getRooms():Map[String, Room]={
-    val source=Source.fromFile("src/main/scala/mud/src/resources/map.txt")
-    val map=source.getLines()
-    val rooms=Array.fill(map.next.toInt)(readRoom(map))
-    source.close()
-    rooms.toMap
-    
-    }
+//  val rooms=getRooms()
+//  def readRoom(rooms:Iterator[String]):(String,Room)={
+//    val name=rooms.next
+//    val description=rooms.next
+//    val items=List.fill(rooms.next.toInt)(Item(rooms.next,rooms.next))
+//    val exits=rooms.next.split(",")
+//    val pname=name.replace("_"," ")
+//    (name, new Room(pname, description, items, exits))
+//  }
+//  def getRooms():Map[String, Room]={
+//    val source=Source.fromFile("src/main/scala/mud/src/resources/map.txt")
+//    val map=source.getLines()
+//    val rooms=Array.fill(map.next.toInt)(readRoom(map))
+//    source.close()
+//    rooms.toMap
+//    
+//    }
+  case class LinkExits(roomsMap:Map[String,ActorRef])
+  case object GetDescription
+  case class GetExit(dir:Int)
+  case class GetItem(itemname:String)
+  case class DropItem(item: String)
+  case object GetName
 
 }
