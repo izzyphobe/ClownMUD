@@ -7,26 +7,31 @@ import akka.actor.ActorRef
 class Room(val name:String,val description:String,var items:List[Item], val exitKeys:Array[String]) extends Actor{
   import Room._
   private var exits:Array[Option[ActorRef]]=null
+  private var in=""
   def receive={
     case LinkExits(roomsMap)=>
       exits=exitKeys.map(keyword=>roomsMap.get(keyword))
-    case GetName=>
-      sender ! name
-    case GetDescription =>
-      sender ! Player.PrintMessage(description)
+    case GetName(id)=>
+      Main.playerManage ! PlayerManager.PrintMessage(name,id)
+    case GetDescription(id) =>
+      sender ! PlayerManager.PrintMessage(describe(),id)
     case GetExit(dir) =>
       sender ! Player.TakeExit(getExit(dir))
     case GetItem(itemName) =>
       sender ! Player.TakeItem(getItem(itemName))
-    case DropItem(item:String) =>
+    case DropItem(item:Item) =>
       dropItem(item)
+    case In(message:String)=>
+      in=message
+    case GetNameFromRoom=>
+      in=name
 
     case m=> println("no! "+m)
     
   }
   
-  def dropItem(item:String)={
-    items.filter(_.name==item)
+  def dropItem(item:Item)={
+    items::=item
   }
   def getItem(itemName:String):Item={
     items.find(item=>item.name==itemName).get
@@ -35,53 +40,58 @@ class Room(val name:String,val description:String,var items:List[Item], val exit
     exits(dir)
   }
   
-  def describe():Unit={
-    println("You are in "+name+"\n"+description)
+  def describe():String={
+    var toprint=""
+    toprint+=("You are in "+name+"\n"+description)
     if(items.length!=0){
       var printitems=""
       for(item<-items){
         printitems=printitems+item.name+"\n ||"+item.desc+"\n"
       }
-      println("\n\n"+"You notice the following item(s):\n\n"+printitems)
+      toprint+=("\n\n"+"You notice the following item(s):\n\n"+printitems)
     }
     else{
-      println("\n\nThere are no items in the room.\n\n")
+      toprint+=("\n\nThere are no items in the room.\n\n")
     }
 
-    var printExits="\nYou see the following exit(s):\n\n"
+    toprint+="\nYou see the following exit(s):\n\n"
     var n=0
 
     while(n<6){
-      if(exitKeys(n)!="x"){
+      if(exits(n)==None) toprint+="\n"
+      else if(exitKeys(n)!="x"){
         if(n==0){
-          printExits=printExits+"To the North: "+ (exits(n).get ! GetName)+"\n"
+          exits(n).get ! GetNameFromRoom
+          toprint+="To the North: "+ (in)+"\n"
         }
         else if(n==1){
-          printExits=printExits+"To the South: "+(exits(n).get ! GetName)+"\n"
+          exits(n).get ! GetNameFromRoom
+          toprint+="To the South: "+(in)+"\n"
         }
         else if(n==2){
-          printExits=printExits+"To the East: "+(exits(n).get ! GetName)+"\n"
+          exits(n).get ! GetNameFromRoom
+          toprint+="To the East: "+(in)+"\n"
         }
         else if(n==3){
-          printExits=printExits+"To the West: " +(exits(n).get ! GetName)+"\n"
+          exits(n).get ! GetNameFromRoom
+          toprint+="To the West: " +(in)+"\n"
         }
         else if(n==4){
-          printExits=printExits+"Up: "+(exits(n).get ! GetName)+"\n"
+          exits(n).get ! GetNameFromRoom
+          toprint+="Up: "+(in)+"\n"
         }
         else if(n==5){
-          printExits=printExits+"Down: "+(exits(n).get ! GetName)+"\n"
+          exits(n).get ! GetNameFromRoom
+          toprint+="Down: "+(in)+"\n"
         }
         else{
-          printExits=printExits+"\n"
+          toprint+="\n"
         }
-      }
-     else{
-        printExits=printExits+""
       }
      n+=1
     }
     
-    sender ! Player.PrintMessage(printExits)
+    toprint
   }
 
  
@@ -110,10 +120,12 @@ object Room{
 //    
 //    }
   case class LinkExits(roomsMap:Map[String,ActorRef])
-  case object GetDescription
+  case class GetDescription(msg:String)
   case class GetExit(dir:Int)
   case class GetItem(itemname:String)
-  case class DropItem(item: String)
-  case object GetName
+  case class DropItem(item: Item)
+  case class In(message:String)
+  case class GetName(id:String)
+  case object GetNameFromRoom
 
 }

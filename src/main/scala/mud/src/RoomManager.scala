@@ -11,8 +11,8 @@ class RoomManager extends Actor {
 	for(room <- context.children) room ! Room.LinkExits(rooms)
 
   def receive = {
-	  case FirstRoom(room:ActorRef)=>
-	    sender ! PlayerManager.AddPlayer(room)
+	  case AddPlayer=>
+	    Main.playerManage ! PlayerManager.AddPlayer(rooms("Honksley_Hall"))
     case m => println("Ooops in RoomManager: " + m)
   }
 
@@ -24,7 +24,6 @@ class RoomManager extends Actor {
     rooms
   }
   
-  def firstRoom=rooms("Honksley_Hall")
   def readRoom(lines: Iterator[String]): (String, ActorRef) = {
     val keyword = lines.next
     val name = lines.next
@@ -40,5 +39,5 @@ class RoomManager extends Actor {
 
 object RoomManager {
   import RoomManager._
-  case class FirstRoom(room:ActorRef)
+  case object AddPlayer
 }
