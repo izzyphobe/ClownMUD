@@ -7,25 +7,27 @@ import akka.actor.ActorRef
 class Room(val name:String,val description:String,var items:List[Item], val exitKeys:Array[String]) extends Actor{
   import Room._
   private var exits:Array[Option[ActorRef]]=null
-  private var in=""
+
   def receive={
     case LinkExits(roomsMap)=>
       exits=exitKeys.map(keyword=>roomsMap.get(keyword))
-    case GetName(id)=>
-      Main.playerManage ! PlayerManager.PrintMessage(name,id)
-    case GetDescription(id) =>
-      sender ! PlayerManager.PrintMessage(describe(),id)
-    case GetExit(dir) =>
-      sender ! Player.TakeExit(getExit(dir))
-    case GetItem(itemName) =>
-      sender ! Player.TakeItem(getItem(itemName))
+    case GetName(send)=>
+      println("sending message to" +send)
+      context.sender ! Player.PrintMessage(name)
+    case GetDescription(send) =>
+      describe(send)
+    case GetExit(dir,send) =>
+      send ! Player.TakeExit(getExit(dir))
+    case GetItem(itemName,send) =>
+      var it=getItem(itemName)
+      if(it!=None){
+        send ! Player.TakeItem(getItem(itemName).get)
+      }
+
+    case GetExitName(msg,send)=>
+      getExitName(msg,send)
     case DropItem(item:Item) =>
       dropItem(item)
-    case In(message:String)=>
-      in=message
-    case GetNameFromRoom=>
-      in=name
-
     case m=> println("no! "+m)
     
   }
@@ -33,14 +35,21 @@ class Room(val name:String,val description:String,var items:List[Item], val exit
   def dropItem(item:Item)={
     items::=item
   }
-  def getItem(itemName:String):Item={
-    items.find(item=>item.name==itemName).get
+  def getItem(itemName:String):Option[Item]={
+    var it=items.find(item=>item.name.toLowerCase==itemName.toLowerCase)
+    if(it!=None){
+      it
+    }else None
   }
   def getExit(dir:Int):Option[ActorRef]={
     exits(dir)
   }
   
-  def describe():String={
+  def getExitName(msg:String,sent:ActorRef)={
+    sent ! Player.PrintMessage(name)
+  }
+  
+  def describe(send:ActorRef)={
     var toprint=""
     toprint+=("You are in "+name+"\n"+description)
     if(items.length!=0){
@@ -56,40 +65,10 @@ class Room(val name:String,val description:String,var items:List[Item], val exit
 
     toprint+="\nYou see the following exit(s):\n\n"
     var n=0
-
-    while(n<6){
-      if(exits(n)==None) toprint+="\n"
-      else if(exitKeys(n)!="x"){
-        if(n==0){
-          exits(n).get ! GetNameFromRoom
-          toprint+="To the North: "+ (in)+"\n"
-        }
-        else if(n==1){
-          exits(n).get ! GetNameFromRoom
-          toprint+="To the South: "+(in)+"\n"
-        }
-        else if(n==2){
-          exits(n).get ! GetNameFromRoom
-          toprint+="To the East: "+(in)+"\n"
-        }
-        else if(n==3){
-          exits(n).get ! GetNameFromRoom
-          toprint+="To the West: " +(in)+"\n"
-        }
-        else if(n==4){
-          exits(n).get ! GetNameFromRoom
-          toprint+="Up: "+(in)+"\n"
-        }
-        else if(n==5){
-          exits(n).get ! GetNameFromRoom
-          toprint+="Down: "+(in)+"\n"
-        }
-        else{
-          toprint+="\n"
-        }
-      }
-     n+=1
-    }
+    send ! Player.PrintMessage(toprint)
+    toprint=""
+    context.parent ! RoomManager.PrintExits(exitKeys,send)
+    
     
     toprint
   }
@@ -120,12 +99,11 @@ object Room{
 //    
 //    }
   case class LinkExits(roomsMap:Map[String,ActorRef])
-  case class GetDescription(msg:String)
-  case class GetExit(dir:Int)
-  case class GetItem(itemname:String)
+  case class GetDescription(sender:ActorRef)
+  case class GetExit(dir:Int,sender:ActorRef)
+  case class GetItem(itemname:String,sender:ActorRef)
   case class DropItem(item: Item)
-  case class In(message:String)
-  case class GetName(id:String)
-  case object GetNameFromRoom
+  case class GetName(sender:ActorRef)
+  case class GetExitName(msg:String,sender:ActorRef)
 
 }

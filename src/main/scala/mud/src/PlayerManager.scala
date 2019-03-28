@@ -3,54 +3,55 @@ package mud
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
-import akka.actor.PoisonPill
+import java.net.ServerSocket
+import java.io.PrintStream
+import java.io.BufferedReader
+import java.net.Socket
 
 class PlayerManager extends Actor {
   import PlayerManager._
-  private var _children:List[ActorRef]=null
+  private var _children: List[ActorRef] = List()
   def receive = {
-    case AddPlayer(room: ActorRef) =>
-      addPlayer(room)
+    case AddPlayer(sock, in, out) =>
+      addPlayer(sock, in, out)
     //    case GetFirst(room:Room)=>
     //      getFirst(room)
-    case NewPlayer(id:String, name: String, description: String, location: ActorRef, inventory: List[Item])=>
-      newPlayer(id:String, name: String, description: String, location: ActorRef, inventory: List[Item])
-    case CheckInput=>
-      for(player <- context.children){
+
+    case CheckInput =>
+      for (player <- context.children) {
         player ! Player.ProcessInput
       }
-    case PrintMessage(msg:String,id:String)=>
-      children(id.toInt) ! Player.PrintMessage(msg)
+    case GlobalChat(msg, sentby) =>
+      for (player <- context.children) {
+
+        player ! Player.PrintMessage(sentby + " said " + msg)
+      }
+    case SingleChat(msg, sentby, sentto) =>
+      context.child(sentto).get ! Player.PrintMessage(sentby + " whispered " + msg)
+
     case m => println("bad thingy in player manager: " + m)
   }
+
   var playerNum = 0
-  def addPlayer(room: ActorRef) = {
+  def addPlayer(sock: Socket, in: BufferedReader, out: PrintStream) = {
     playerNum += 1
-    var thisPlayer = context.actorOf(Props(new Player("", "", "", room, null)),playerNum.toString)
-    thisPlayer ! Player.CreatePlayer(room,playerNum.toString)
+    var newPlay = context.actorOf(Props(new Player(
+      playerNum.toString, "", "", null, List(Item("Starter Bow", "Emblazoned on the front:'Nerf or Nothing'")), sock, in, out)), playerNum.toString)
+
+    _children = newPlay :: _children
+
+    Main.roomManage ! RoomManager.SetStartRoom(newPlay)
   }
-  def newPlayer(id:String, name: String, description: String, location: ActorRef, inventory: List[Item])={
-    context.child(id).get ! PoisonPill
-    var player = context.actorOf(Props(new Player("player"+id, name, description, location, inventory)),"player"+id.toString)
-    if(_children==null){
-      _children=List(player)
-    }
-    else{
-      _children=player::_children
-    }
-    
-  }
-  //  def getFirst(room:Room):Room={
-  //    val first=room
-  //  }
-  def children(x:Int)=_children(x)
+
+  def children(x: Int) = _children(x)
 }
 
 object PlayerManager {
-  case class AddPlayer(room: ActorRef)
-  case class NewPlayer(val id:String,private var name: String, private var description: String, private var location: ActorRef, private var inventory: List[Item])
+  case class AddPlayer(sock: Socket, in: BufferedReader, out: PrintStream)
   //  case class GetFirst(room:Room)
   case object CheckInput
-  case class PrintMessage(a:String,b:String)
+  case class GlobalChat(msg: String, sentby: String)
+  case class SingleChat(msg: String, sentby: String, sentto: String)
+
 }
 
