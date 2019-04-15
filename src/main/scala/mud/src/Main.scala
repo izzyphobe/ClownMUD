@@ -20,21 +20,16 @@ object Main extends App {
   val roomManage = sys.actorOf(Props(new RoomManager), "RoomManager")
   val playerManage = sys.actorOf(Props(new PlayerManager), "PlayerManager")
   
-  sys.scheduler.schedule(0.seconds,0.1.seconds,playerManage,PlayerManager.CheckInput)
-  val ss = new ServerSocket(8001)
-  Future{
-    var admin=readLine
-    if(admin=="stop") {
-      ss.close()
-      System.exit(0)
-    }
-  }
+
+  val ss = new ServerSocket(8100)
+  sys.scheduler.schedule(0.seconds, 0.1.seconds, playerManage, PlayerManager.CheckInput)
   while (true) {
     val sock = ss.accept()
     val in = new BufferedReader(new InputStreamReader(sock.getInputStream))
     val out = new PrintStream(sock.getOutputStream)
     Future {
-      
+      println("future")
+      out.println("test")
       playerManage ! PlayerManager.AddPlayer(sock,in,out)
     }
     

@@ -4,8 +4,9 @@ import scala.io.Source
 import akka.actor.Actor
 import akka.actor.ActorRef
 
-class Room(val name:String,val description:String,var items:List[Item], val exitKeys:Array[String]) extends Actor{
+case class Room(val name:String,val description:String,var items:List[Item], val exitKeys:Array[String]) extends Actor{
   import Room._
+  import PlayerManager._
   private var exits:Array[Option[ActorRef]]=null
 
   def receive={
@@ -17,12 +18,12 @@ class Room(val name:String,val description:String,var items:List[Item], val exit
     case GetDescription(send) =>
       describe(send)
     case GetExit(dir,send) =>
-      send ! Player.TakeExit(getExit(dir))
+      if(getExit(dir)==None) send ! Player.PrintMessage("There is no exit that way.") else send ! Player.TakeExit(getExit(dir))
     case GetItem(itemName,send) =>
       var it=getItem(itemName)
       if(it!=None){
         send ! Player.TakeItem(getItem(itemName).get)
-      }
+      }else send ! Player.PrintMessage("That item is not in this room.")
 
     case GetExitName(msg,send)=>
       getExitName(msg,send)

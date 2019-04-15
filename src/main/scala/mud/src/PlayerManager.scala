@@ -10,14 +10,13 @@ import java.net.Socket
 
 class PlayerManager extends Actor {
   import PlayerManager._
-  private var _children: List[ActorRef] = List()
+  private var _children: Map[String,ActorRef] = Map()
   def receive = {
     case AddPlayer(sock, in, out) =>
       addPlayer(sock, in, out)
-    //    case GetFirst(room:Room)=>
-    //      getFirst(room)
-
+      println("player class reached")
     case CheckInput =>
+      
       for (player <- context.children) {
         player ! Player.ProcessInput
       }
@@ -28,30 +27,32 @@ class PlayerManager extends Actor {
       }
     case SingleChat(msg, sentby, sentto) =>
       context.child(sentto).get ! Player.PrintMessage(sentby + " whispered " + msg)
-
+    case PlayerDone(player,name)=>
+          println("player made: "+name)
     case m => println("bad thingy in player manager: " + m)
   }
 
   var playerNum = 0
   def addPlayer(sock: Socket, in: BufferedReader, out: PrintStream) = {
+    println("playermanager got it")
     playerNum += 1
     var newPlay = context.actorOf(Props(new Player(
       playerNum.toString, "", "", null, List(Item("Starter Bow", "Emblazoned on the front:'Nerf or Nothing'")), sock, in, out)), playerNum.toString)
 
-    _children = newPlay :: _children
 
+    println("character creation done in player manager")
     Main.roomManage ! RoomManager.SetStartRoom(newPlay)
   }
-
-  def children(x: Int) = _children(x)
+//  def newChild(n:String,pl:ActorRef)=???
+  def children(x: String) = _children(x)
 }
 
 object PlayerManager {
   case class AddPlayer(sock: Socket, in: BufferedReader, out: PrintStream)
-  //  case class GetFirst(room:Room)
   case object CheckInput
   case class GlobalChat(msg: String, sentby: String)
   case class SingleChat(msg: String, sentby: String, sentto: String)
+  case class PlayerDone(player:Player,name:String)
 
 }
 

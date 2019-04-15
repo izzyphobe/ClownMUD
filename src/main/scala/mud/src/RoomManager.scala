@@ -6,7 +6,7 @@ import akka.actor.Props
 
 
 class RoomManager extends Actor {
-
+import PlayerManager._
   import RoomManager._
 	val rooms = readRooms()
 	for(room <- context.children) room ! Room.LinkExits(rooms)
@@ -60,6 +60,7 @@ class RoomManager extends Actor {
   }
   def setStartRoom(player:ActorRef)={
     player ! Player.GiveRoom(rooms("Honksley_Hall"))
+    println("start room given")
   }
   
   def readRoom(lines: Iterator[String]): (String, ActorRef) = {
