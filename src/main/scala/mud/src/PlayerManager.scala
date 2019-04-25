@@ -26,7 +26,7 @@ class PlayerManager extends Actor {
         player ! Player.PrintMessage(sentby + " said " + msg)
       }
     case SingleChat(msg, sentby, sentto) =>
-      context.child(sentto).get ! Player.PrintMessage(sentby + " whispered " + msg)
+      context.child(sentto).get ! Player.out.println(sentby + " whispered " + msg)
     case PlayerDone(player,name)=>
           println("player made: "+name)
     case m => println("bad thingy in player manager: " + m)
