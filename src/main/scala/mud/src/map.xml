@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map size="10">
+	<room id="Honksley_Hall" name="Honksley Hall">
+		<desc>The hub of all student activity. Students are bustling to get to their next Glass (Goofy Class).</desc>
+		<items>
+			<item name="Red Nose" desc="Someone dropped their nose. Oh well, finders keepers, amirite?"/>
+		</items>
+		<exits>
+			<exit room="Computer_Lab" direction="n"/>
+			<exit room="
+	</room>
+	
+	<room id="Computer_Lab" name="Computer Lab">
+	</room>
+	
+	<room id="Darkened_Hallway" name="Darkened Hallway">
+	</room>
+	
+	<room id="Bathroom" name="Bathroom">
+	</room>
+	
+	<room id="Biology_Lab" name="Biology Lab">
+	</room>
+	
+	<room id="Jesters_Courtyard" name="Jester's Courtyard">
+	</room>
+	
+	<room id="CCU_1" name="Clown Containment Units, 1st Floor">
+	</room>
+	
+	<room id="CCU_2" name="Clown Containment Units, 2nd Floor">
+	</room>
+	
+	<room id="CCU_3" name="Clown Containment Unites, 3rd Floor">
+	</room>
+	
+	<room id="Your_dorm" name="Your dorm">
+	</room>

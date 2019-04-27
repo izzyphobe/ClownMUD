@@ -2,18 +2,8 @@ package mud
 import scala.io.StdIn
 import akka.actor.Actor
 import akka.actor.ActorRef
-import akka.actor.Props
 import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.InputStream
-import java.io.BufferedInputStream
-import java.io.OutputStream
-import java.io.ObjectOutputStream
 import java.io.PrintStream
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import akka.actor.PoisonPill
 import java.net.Socket
 
 class Player(
@@ -30,68 +20,96 @@ class Player(
   import PlayerManager._
   val helpMsg = "COMMANDS: \n \n n, s, e, w, u, d - moves player \n  look - reprints description of current room \n inv - lists current inventory \n get [item] - grab item from the room and add to your inventory \n drop [item] - drops an item from your inventory and puts it in the room \n say - sends a messsage globally \n exit - exits the game. Your data will not be saved. It is worth nothing."
   def receive = {
-    case PrintMessage(message: String) =>
-      println("printing")
-      printMessage(message)
     case TakeExit(optRoom: Option[ActorRef]) =>
-      takeExit(optRoom)
-    case TakeItem(item: Item) =>
-      takeItem(item)
+      if(optRoom!=None){
+        location = optRoom.get
+        location ! Room.ActorEnters(name,self)
+      }
+      else out.println("There is no exit that way!")
+      if(target!=None) target.get ! StopCombat
+      
+    case TakeItem(item) =>
+      if (item == None) out.println("This room does not have that item in it!")
+      else {
+        val newInv: List[Item] = item.get :: inventory
+        inventory = newInv
+      }
     case GiveRoom(room: ActorRef) =>
-      giveRoom(room)
+      location = room
+      println("room given")
+      createPlayer
     case ProcessInput =>
-      var cmd = in.readLine
-      parseCommand(cmd, id)
+      if (in.ready()) {
+        var cmd = in.readLine
+        parseCommand(cmd, id)
+      }
+    case SendExit(name) =>
+      out.println(name.toString())
+    case GetDescription(desc) =>
+      out.println(desc.toString())
+    case GetChat(msg: String) =>
+      out.println(msg.toString())
+    case ChangeDescription(desc) =>
+      roomdesc = desc
+    case StopCombat=>
+      out.println("You stopped combat.")
+      target=None
+    case StartAttack(toattack)=>
+      if(toattack==None) out.println("That player is not in the room!") else target=toattack
     case m =>
       println("uh oh whoopsie " + m)
 
   }
-  def giveRoom(room: ActorRef) = {
-    location = room
-    println("room given")
-    createPlayer
-  }
-  def printMessage(msg: String) = {
-    out.println(msg)
-  }
+
+  var roomdesc = ""
+  var exits = ""
   def splitFirst(in: String, split: String) = {
-    in.split(split).tail.toString
+    in.split(split).tail
   }
   def parseCommand(cmd: String, sender: String): Unit = {
-    printMessage("\n")
+    out.println("\n")
     if (cmd == "s" || cmd == "n" || cmd == "e" || cmd == "w" || cmd == "u" || cmd == "d") {
       move(cmd, sender)
     } else if (cmd == "look") {
       location ! Room.GetDescription(self)
+      Thread.sleep(20)
+      out.println(roomdesc)
 
     } else if (cmd == "inv") {
       printInv
     } else if (cmd.startsWith("get")) {
       var toGet = splitFirst(cmd, "t ")
-      location ! Room.GetItem(toGet, self)
+      location ! Room.GetItem(toGet(0), context.self)
     } else if (cmd.startsWith("drop")) {
-      var toDrop = splitFirst(cmd, ("p ")).toLowerCase.trim
-      printMessage(toDrop)
-      var it = inventory.filter(_.name == toDrop)
+      var toDrop = splitFirst(cmd, ("p "))(0).toLowerCase
+      var it = inventory.filter(_.name.toLowerCase==toDrop)
       if (it.length > 0) {
         location ! Room.DropItem(it(0))
-        inventory = inventory.filter(_.name == toDrop)
-      } else printMessage("You do not have that item!")
+        inventory = inventory.filterNot(_.name.toLowerCase == toDrop)
+        Thread.sleep(20)
+        out.println("You dropped your " + toDrop)
+      } else out.println("You do not have that item!")
     } else if (cmd == "help") {
-      printMessage("COMMANDS: \n \n n, s, e, w, u, d - moves player \n \n look - reprints description of current room \n inv - lists current inventory \n get [item] - grab item from the room and add to your inventory \n drop [item] - drops an item from your inventory and puts it in the room \n exit - exits the game. Your data will not be saved. It is worth nothing.")
+      out.println(helpMsg)
     } else if (cmd.startsWith("say")) {
-      var toSay = splitFirst(cmd, "y ")
-      context.parent ! PlayerManager.GlobalChat(toSay, name)
-    } //      else if(cmd.startsWith("tell")){
-    //        var to=splitFirst(cmd,"l ")
-    //        
-    //      }
-    //TODO single chat
-    else {
-      printMessage("Invalid command! Type 'help' for a list of all available commands.")
+      var toSay = splitFirst(cmd, "y ")(0)
+      Main.playerManage ! PlayerManager.GlobalChat(toSay, name)
+      //TODO single chat
+    } else if (cmd.startsWith("kill")) {
+      location ! Room.ScanTarget(splitFirst(cmd, "l ")(0))
+    } else if (cmd.startsWith("flee")){
+      
+    } else {
+      out.println("Invalid command! Type 'help' for a list of all available commands.")
     }
-    printMessage("\n")
   }
+
+  //STATS
+  var defense = 10
+  var maxHP = 200
+  var target: Option[ActorRef] = None
+  var strength = 7
+  var HP = maxHP
 
   def move(d: String, sender: String): Unit = {
     val dir = d.trim
@@ -108,60 +126,42 @@ class Player(
     } else if (dir == "d") {
       location ! Room.GetExit(5, self)
     }
-    location ! Room.GetName(self)
-    location ! Room.GetDescription(self)
   }
   def printInv(): Unit = {
     if (inventory.length == 0) {
-      printMessage("You don't have anything in your inventory! Type 'get [item name]' to grab something from the room.")
+      out.println("You don't have anything in your inventory! Type 'get [item name]' to grab something from the room.")
     } else {
       var toPrint = ""
       for (item <- inventory) {
         toPrint = toPrint + item.name + "\n||" + item.desc + "\n\n"
       }
-      printMessage(toPrint)
+      out.println(toPrint)
     }
-  }
-  def takeExit(optRoom: Option[ActorRef]) = {
-    if (optRoom == None) {
-      printMessage("There is no exit that way.")
-    } else {
-      location = optRoom.get
-    }
-  }
-  def takeItem(item: Item) = {
-    val newInv: List[Item] = item :: inventory
-    inventory = newInv
   }
   def createPlayer = {
 
-    printMessage("What's your clown name?\n")
+    out.println("What's your clown name?\n")
     name = in.readLine
-    printMessage("What's your clown description?\n")
+    out.println("What's your clown description?\n")
     description = in.readLine
-    printMessage(helpMsg)
-    context.parent ! PlayerManager.PlayerDone(this, name)
+    out.println(helpMsg)
+    context.parent ! PlayerManager.PlayerDone(context.self, name)
 
   }
 }
 object Player {
   case object ProcessInput
-  case class PrintMessage(message: String)
   case class TakeExit(optRoom: Option[ActorRef])
-  case class TakeItem(item: Item)
+  case class TakeItem(item: Option[Item])
   case class CreatePlayer(room: ActorRef, id: String)
   case class GiveRoom(room: ActorRef)
-  //  def initPlayer(): Player = {
-  //    println("What's your clown name?\n")
-  //    val name = readLine
-  //    println("\nWhat's your backstory?\n")
-  //    val description = readLine
-  //    println("\nNice. I'm Chad. My clown name is Chaddington III. Good to meet you bro.\nAlright, my first class is starting soon. See ya!\n")
-  //    println("[CHADDINGTON III waves goodbye. He has on a Gucci eyepatch. You don't want to ask questions.]")
-  //    val location = "Honksley_Hall"
-  //    println("\nType 'look' to look around. Type 'help' to see more commands.")
-  //    val inventory = List(Item("Catcher's glove", "You hate baseball, but the gloves make for good clown-punching armor."))
-  //    val player = new Player(name, description, location, inventory)
-  //    player
-  //  }
+  case class SendExit(room: String)
+  case class GetDescription(desc: String)
+  case class GetChat(chat: String)
+  case class ChangeDescription(desc: String)
+
+  case class TakeDamage(attackpower: Int)
+  case class StartAttack(target:Option[ActorRef])
+  case object StopCombat
+
 }

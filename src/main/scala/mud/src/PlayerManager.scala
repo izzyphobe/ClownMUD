@@ -20,15 +20,15 @@ class PlayerManager extends Actor {
       for (player <- context.children) {
         player ! Player.ProcessInput
       }
-    case GlobalChat(msg, sentby) =>
-      for (player <- context.children) {
 
-        player ! Player.PrintMessage(sentby + " said " + msg)
-      }
     case SingleChat(msg, sentby, sentto) =>
-      context.child(sentto).get ! Player.out.println(sentby + " whispered " + msg)
+    case GlobalChat(msg,sender)=>
+      for(child<-_children) child._2 ! Player.GetChat(sender+"  said "+msg.toString())
+      
     case PlayerDone(player,name)=>
           println("player made: "+name)
+          _children=_children+((name,player))
+    
     case m => println("bad thingy in player manager: " + m)
   }
 
@@ -52,7 +52,7 @@ object PlayerManager {
   case object CheckInput
   case class GlobalChat(msg: String, sentby: String)
   case class SingleChat(msg: String, sentby: String, sentto: String)
-  case class PlayerDone(player:Player,name:String)
+  case class PlayerDone(player:ActorRef,name:String)
 
 }
 

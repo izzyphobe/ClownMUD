@@ -1,31 +1,42 @@
-package mud.src
+package mud
 
 import akka.actor.Actor
 import akka.actor.ActorRef
 import scala.reflect.ClassTag
 
-class PriorityQueue[A: ClassTag](p: (A, A) => Boolean) {
-  private var default: A = _
-  private class Node(val data: A, var prev: Node, var next: Node)
-  private var end = new Node(default, null, null)
-  end.next = end
+class PriorityQueue[A](higherP: (A, A) => Boolean) { 
+  private var default:A = _
+  private class Node(val data: A, var prev: Node, var next: Node)  
+  private val end = new Node(default, null, null)
   end.prev = end
-  def enqueue(a: A): Unit = {
-    var rover = end.next
-    while (rover != end && p(rover.data, a)) {
+  end.next = end
+  
+  def enqueue(elem: A):Unit = {
+    val newNode = new Node(elem, end.prev, end)
+    end.prev.next = newNode
+    end.prev = newNode
+    println(newNode.data)
+  }
+  
+  def dequeue: A = {
+    val torem = findHighestPriority
+    torem.prev.next = torem.next
+    torem.next.prev = torem.prev
+    torem.data
+  }
+  def peek: A = {
+    findHighestPriority.data
+  }
+  
+  def isEmpty: Boolean = end.prev == end
+  
+  private def findHighestPriority(): Node = {
+    var ret = end.next
+    var rover = ret.next
+    while(rover != end){
+      if(higherP(rover.data, ret.data)) ret = rover
       rover = rover.next
     }
-    rover.next.prev = new Node(a, rover, rover.next)
-    rover.next = rover.next.prev
-  }
-  def dequeue(): A = {
-    val ret = end.next.data
-    end.next.next.prev = end
-    end.next = end.next.next
     ret
   }
-  def peek: A = end.next.data
-
-  def isEmpty: Boolean = end.next == end
-
 }
