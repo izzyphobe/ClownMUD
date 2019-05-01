@@ -18,11 +18,22 @@ object Main extends App {
   val system = ActorSystem("MUD")
   val roomManage = system.actorOf(Props(new RoomManager), "RoomManager")
   val playerManage = system.actorOf(Props(new PlayerManager), "PlayerManager")
+  val NPCManage=system.actorOf(Props(new NPCManager), "NPCManager")
   val activityManage=system.actorOf(Props(new ActivityManager),"ActivityManager")
   system.scheduler.schedule(0.seconds, 0.1.seconds, playerManage, PlayerManager.CheckInput)
-  system.scheduler.schedule(0.seconds, 0.1.seconds, activityManage, ActivityManager.CheckQueue)
+  system.scheduler.schedule(0.seconds, 10.milliseconds, activityManage, ActivityManager.CheckQueue)
+    system.scheduler.schedule(0.seconds, 10.milliseconds, NPCManage, NPCManager.Update)
 
-  val ss = new ServerSocket(8100)
+  val ss = new ServerSocket(8086)
+    activityManage ! ActivityManager.Test
+    activityManage ! ActivityManager.Schedule(Activity(3000,playerManage,PlayerManager.Check("3000")))
+                    activityManage ! ActivityManager.Schedule(Activity(300000,playerManage,PlayerManager.Check("300000")))
+        activityManage ! ActivityManager.Schedule(Activity(300,playerManage,PlayerManager.Check("300")))
+            activityManage ! ActivityManager.Schedule(Activity(10,playerManage,PlayerManager.Check("10")))
+
+
+
+  
 
   Future {
     while (true) {
@@ -31,6 +42,7 @@ object Main extends App {
       val out = new PrintStream(sock.getOutputStream)
       Future {
         out.println("Beginning character creation!")
+        Thread.sleep(50)
         playerManage ! PlayerManager.AddPlayer(sock, in, out)
       }
 

@@ -21,7 +21,8 @@ class PlayerManager extends Actor {
         player ! Player.ProcessInput
       }
 
-    case SingleChat(msg, sentby, sentto) =>
+    case Check(msg) =>
+      println(msg)
     case GlobalChat(msg,sender)=>
       for(child<-_children) child._2 ! Player.GetChat(sender+"  said "+msg.toString())
       
@@ -53,6 +54,7 @@ object PlayerManager {
   case class GlobalChat(msg: String, sentby: String)
   case class SingleChat(msg: String, sentby: String, sentto: String)
   case class PlayerDone(player:ActorRef,name:String)
+  case class Check(msg:String)
 
 }
 

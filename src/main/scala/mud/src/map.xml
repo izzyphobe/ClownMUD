@@ -1,38 +1,115 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<map size="10">
+<?xml version = "1.0"?>
+<rooms>
 	<room id="Honksley_Hall" name="Honksley Hall">
 		<desc>The hub of all student activity. Students are bustling to get to their next Glass (Goofy Class).</desc>
 		<items>
 			<item name="Red Nose" desc="Someone dropped their nose. Oh well, finders keepers, amirite?"/>
 		</items>
-		<exits>
+		
 			<exit room="Computer_Lab" direction="n"/>
-			<exit room="
+			<exit room="Darkened_Hallway" direction="s"/>
+			<exit room="Bathroom" direction="e"/>
+			<exit room="Jesters_Courtyard" direction="w"/>
+		
 	</room>
 	
 	<room id="Computer_Lab" name="Computer Lab">
+		<desc>Millions of computers are lined up. Millions. Clown college has gotten more and more popular</desc>
+		<items>
+			<item name="Crumpled up gum wrapper" desc="Smells like juicy fruit. Mmm..."/>
+			<item name="Floppy disk" desc="Who put this here? Was this someone's idea of a joke? This may be clown college, but that is NOT funny."/>
+			<item name="A copy of E.T. for the Atari 2600" desc="Based on the film of the same name. Released in 1982 never to be seen again."/>
+		</items>
+		
+			<exit room="Honksley_Hall" direction="s"/>
+		
 	</room>
 	
 	<room id="Darkened_Hallway" name="Darkened Hallway">
+		<desc>A faint droning can be heard. It sounded like it was miles away, but as soon as you stepped foot in the hallway, you realize it's right by your ear.</desc>
+		<items>
+			<item name="Whoopie cushion" desc="Someone wrote 'TURN ME OVER' in blood on it. You turn it over. The other side says 'GOTCHA', also written in blood. Classy."/>
+		</items>
+
+			<exit room="Computer_Lab" direction="n"/>
+			<exit room="Biology_Lab" direction="s"/>
+
 	</room>
 	
 	<room id="Bathroom" name="Bathroom">
+		<desc>The stalls are arranged in a circle. In the center, there are ten sinks, each a different color of the rainbow. Carousel music is playing. After a few seconds, you realize the whole room is spinning.</desc>
+		<items>
+			<item name="Broken hacky sack" desc="Its innards are leaking out."/>
+			
+		</items>
+		
+			<exit room="Honksley_Hall" direction="w"/>
+			
+		
 	</room>
 	
 	<room id="Biology_Lab" name="Biology Lab">
+		<desc>The stench of Clown Biology fills the air. These Clown Biology majors are clownier than you'll ever be. You wonder if you really belong here.</desc>
+		<items>
+			<item name="Clown skeleton" desc="You didn't realize clown skeletons looked different than human ones. Apparently they do."/>
+			<item name="Educational poster" desc="It says 'CLOWN REPRODUCTION' in huge letters. The diagram depicts a pie being hurled at a clown, along with an equation tracking the trajcetory of the pie. Who knew biology had so much calculus?"/>
+			
+		</items>
+		
+			<exit room="Darkened_Hallway" direction="n"/>
+		
 	</room>
 	
 	<room id="Jesters_Courtyard" name="Jester's Courtyard">
+		<desc>It's cold outside. It makes your clown makeup itch a lot. This must be the main outside area - clowns are walking and running and hand-walking and hand-running and headstanding and juggling and brandishing pies everywhere. You realize this might be the right place for you after all.</desc>
+		<items>
+			<item name="Banjo" desc="Someone left their banjo. It looks expensive."/>
+			<item name="Custard pie" desc="A classic."/>
+		</items>
+		
+			<exit room="Honksley_Hall" direction="e"/>
+			<exit room="CCU_1" direction="w"/>
+		
 	</room>
 	
 	<room id="CCU_1" name="Clown Containment Units, 1st Floor">
+		<desc>You enter the first floor of the student housing. Each dorm room door is a different color of the rainbow.</desc>
+		<items>
+			<item name="Cookie" desc="Oatmeal raisin. Hmm... That's the least silly cookie out there! This has no business being at clown college. You might turn this into security - the perp could be suspended for anti-silly sentiment."/>
+			
+		</items>
+		
+			<exit room="Jesters_Courtyard" direction="e"/>
+			<exit room="CCU_2" direction="u"/>
+		
 	</room>
 	
 	<room id="CCU_2" name="Clown Containment Units, 2nd Floor">
+		<desc>You take the elevator up. These doors aren't colored as brightly... Something feels off.</desc>
+		<items>
+			<item name="???" desc="It's gooey..."/>
+		</items>
+		
+			<exit room="CCU_3" direction="u"/>
+			<exit room="CCU_1" direction="d"/>
+		
 	</room>
 	
-	<room id="CCU_3" name="Clown Containment Unites, 3rd Floor">
+	<room id="CCU_3" name="Clown Containment Units, 3rd Floor">
+		<desc>You take the elevator up. These doors... They're metal, and spaced only one foot apart. This isn't right... This isn't right at all...</desc>
+		<items>
+			<item name="Piece of broken glass" desc="There's some custard on it... Something horrible has happened here."/>
+		</items>
+		
+			<exit room="CCU_2" direction="d"/>
+			<exit room="Your_dorm" direction="s"/>
+		
 	</room>
 	
 	<room id="Your_dorm" name="Your dorm">
+		<desc> It's approximately 5 feet in width, and goes 10 feet deep. Not huge, but at least you're in a single!</desc>
+		
+			<exit room="CCU_3" direction="n"/>
+		
 	</room>
+</rooms>

@@ -5,6 +5,8 @@ import akka.actor.ActorRef
 import java.io.BufferedReader
 import java.io.PrintStream
 import java.net.Socket
+import java.util.Timer
+import java.util.TimerTask
 
 class Player(
   val id: String,
@@ -20,14 +22,17 @@ class Player(
   import PlayerManager._
   val helpMsg = "COMMANDS: \n \n n, s, e, w, u, d - moves player \n  look - reprints description of current room \n inv - lists current inventory \n get [item] - grab item from the room and add to your inventory \n drop [item] - drops an item from your inventory and puts it in the room \n say - sends a messsage globally \n exit - exits the game. Your data will not be saved. It is worth nothing."
   def receive = {
-    case TakeExit(optRoom: Option[ActorRef]) =>
-      if(optRoom!=None){
+    case TakeExit(optRoom) =>
+      if (optRoom != None) {
         location = optRoom.get
-        location ! Room.ActorEnters(name,self)
+        location ! Room.ActorEnters(name, self)
+      } else out.println("There is no exit that way!")
+      if (target != None){
+        target.get ! StopCombat
+         target=None
+
       }
-      else out.println("There is no exit that way!")
-      if(target!=None) target.get ! StopCombat
-      
+     
     case TakeItem(item) =>
       if (item == None) out.println("This room does not have that item in it!")
       else {
@@ -51,11 +56,25 @@ class Player(
       out.println(msg.toString())
     case ChangeDescription(desc) =>
       roomdesc = desc
-    case StopCombat=>
+    case StopCombat =>
       out.println("You stopped combat.")
-      target=None
-    case StartAttack(toattack)=>
-      if(toattack==None) out.println("That player is not in the room!") else target=toattack
+      target = None
+    case StartAttack(toattack) =>
+      if (toattack == None) out.println("That player is not in the room!")
+      else if (target != None) out.println("You're already in battle!")
+      else {
+        target = toattack
+        out.println("You engage in fisticuffs.")
+      }
+    case TakeDamage(power, attacker) =>
+      if (0 >= HP) {
+        out.println("You died of fisticuffs. I guess clown college just isn't for you, " + name + "!")
+        sock.close
+      }
+      
+      if (target == None) target = Some(attacker)
+      HP = HP - (power / (defense / 2))
+      out.println("You took "+(power / (defense / 2))+" points of damage.\nYour health is now at "+HP+"/"+maxHP)
     case m =>
       println("uh oh whoopsie " + m)
 
@@ -82,7 +101,7 @@ class Player(
       location ! Room.GetItem(toGet(0), context.self)
     } else if (cmd.startsWith("drop")) {
       var toDrop = splitFirst(cmd, ("p "))(0).toLowerCase
-      var it = inventory.filter(_.name.toLowerCase==toDrop)
+      var it = inventory.filter(_.name.toLowerCase == toDrop)
       if (it.length > 0) {
         location ! Room.DropItem(it(0))
         inventory = inventory.filterNot(_.name.toLowerCase == toDrop)
@@ -92,13 +111,19 @@ class Player(
     } else if (cmd == "help") {
       out.println(helpMsg)
     } else if (cmd.startsWith("say")) {
-      var toSay = splitFirst(cmd, "y ")(0)
+      var toSay = cmd.slice(4, cmd.length)
       Main.playerManage ! PlayerManager.GlobalChat(toSay, name)
       //TODO single chat
     } else if (cmd.startsWith("kill")) {
-      location ! Room.ScanTarget(splitFirst(cmd, "l ")(0))
-    } else if (cmd.startsWith("flee")){
-      
+      if (cmd.length >= 6) location ! Room.ScanTarget(cmd.slice(5, cmd.length))
+      else out.println("Please specify a player!")
+    } else if (cmd.startsWith("flee")) {
+      if (target != None) {
+        target.get ! StopCombat
+        out.println("You stopped fighting. Coward.")
+      } else out.println("You aren't fighting anyone!")
+      target = None
+
     } else {
       out.println("Invalid command! Type 'help' for a list of all available commands.")
     }
@@ -106,26 +131,13 @@ class Player(
 
   //STATS
   var defense = 10
-  var maxHP = 200
+  var maxHP = 100
   var target: Option[ActorRef] = None
   var strength = 7
   var HP = maxHP
 
   def move(d: String, sender: String): Unit = {
-    val dir = d.trim
-    if (dir == "n") {
-      location ! Room.GetExit(0, self)
-    } else if (dir == "s") {
-      location ! Room.GetExit(1, self)
-    } else if (dir == "e") {
-      location ! Room.GetExit(2, self)
-    } else if (dir == "w") {
-      location ! Room.GetExit(3, self)
-    } else if (dir == "u") {
-      location ! Room.GetExit(4, self)
-    } else if (dir == "d") {
-      location ! Room.GetExit(5, self)
-    }
+    location ! Room.GetExit(d)
   }
   def printInv(): Unit = {
     if (inventory.length == 0) {
@@ -148,6 +160,19 @@ class Player(
     context.parent ! PlayerManager.PlayerDone(context.self, name)
 
   }
+
+  var t = 0
+  val timer = new Timer
+  val task = new TimerTask {
+    def run() = {
+      if (target != None) {
+        Main.activityManage ! ActivityManager.Schedule(Activity(4000, target.get, Player.TakeDamage(strength, self)))
+      }
+    }
+    run()
+  }
+  timer.scheduleAtFixedRate(task, 0, 400000)
+
 }
 object Player {
   case object ProcessInput
@@ -160,8 +185,8 @@ object Player {
   case class GetChat(chat: String)
   case class ChangeDescription(desc: String)
 
-  case class TakeDamage(attackpower: Int)
-  case class StartAttack(target:Option[ActorRef])
+  case class TakeDamage(attackpower: Int, from: ActorRef)
+  case class StartAttack(target: Option[ActorRef])
   case object StopCombat
 
 }

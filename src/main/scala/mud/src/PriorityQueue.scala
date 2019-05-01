@@ -6,16 +6,16 @@ import scala.reflect.ClassTag
 
 class PriorityQueue[A](higherP: (A, A) => Boolean) { 
   private var default:A = _
-  private class Node(val data: A, var prev: Node, var next: Node)  
-  private val end = new Node(default, null, null)
-  end.prev = end
-  end.next = end
+  case class Node(val data: A, var prev: Node, var next: Node)  
+  private val t =  Node(default, null, null)
+  t.prev = t
+  t.next = t
   
   def enqueue(elem: A):Unit = {
-    val newNode = new Node(elem, end.prev, end)
-    end.prev.next = newNode
-    end.prev = newNode
-    println(newNode.data)
+    val newNode =  Node(elem, t.prev, t)
+    t.prev.next = newNode
+    t.prev = newNode
+
   }
   
   def dequeue: A = {
@@ -28,12 +28,12 @@ class PriorityQueue[A](higherP: (A, A) => Boolean) {
     findHighestPriority.data
   }
   
-  def isEmpty: Boolean = end.prev == end
+  def isEmpty: Boolean = t.prev == t
   
   private def findHighestPriority(): Node = {
-    var ret = end.next
+    var ret = t.next
     var rover = ret.next
-    while(rover != end){
+    while(rover != t){
       if(higherP(rover.data, ret.data)) ret = rover
       rover = rover.next
     }

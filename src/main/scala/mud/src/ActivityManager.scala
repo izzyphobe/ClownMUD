@@ -5,7 +5,10 @@ import akka.actor.ActorRef
 import java.util.TimerTask
 import java.util.Timer
 
-case class Activity(time: Int, sentby: ActorRef, sentto: ActorRef, function: (ActorRef, ActorRef) => Unit)
+case class Activity(private var _time: Int, sentto: ActorRef, function:Any){
+  def lowerTime= _time-=1
+  def time=_time
+}
 class ActivityManager extends Actor {
   import ActivityManager._
   val schedule = new PriorityQueue(higherP)
@@ -17,14 +20,18 @@ class ActivityManager extends Actor {
       if (!schedule.isEmpty) {
         if (schedule.peek.time >= t) {
           currentAct = schedule.dequeue
-          currentAct.sentto ! currentAct.function(currentAct.sentby, currentAct.sentto)
+          currentAct.sentto ! currentAct.function
+          t=0
         }
       }
+    case Test =>
+      
+      schedule.enqueue(Activity(100,context.parent, println("Test worked")))
 
-    case m =>
+    case m => println("bad thing happened: "+m+" sent by "+sender)
   }
   def higherP(a: Activity, b: Activity): Boolean = {
-    if (a.time > b.time) true else false
+    if (a.time < b.time) true else false
   }
 
   var t = 0
@@ -38,4 +45,5 @@ class ActivityManager extends Actor {
 object ActivityManager {
   case class Schedule(act: Activity)
   case object CheckQueue
+  case object Test
 }
