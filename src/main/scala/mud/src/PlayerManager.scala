@@ -25,7 +25,11 @@ class PlayerManager extends Actor {
       println(msg)
     case GlobalChat(msg,sender)=>
       for(child<-_children) child._2 ! Player.GetChat(sender+"  said "+msg.toString())
-      
+    
+    case Tell(sentby,sentto,msg)=>
+      if (_children(sentto)!=null){
+        _children(sentto) ! Player.GetChat(sentby + " whispered "+msg.toString())
+      } else children(sentto) ! Player.GetChat("That player does not exist!")
     case PlayerDone(player,name)=>
           println("player made: "+name)
           _children=_children+((name,player))
@@ -38,7 +42,7 @@ class PlayerManager extends Actor {
     println("playermanager got it")
     playerNum += 1
     var newPlay = context.actorOf(Props(new Player(
-      playerNum.toString, "", "", null, List(Item("Starter Bow", "Emblazoned on the front:'Nerf or Nothing'")), sock, in, out)), playerNum.toString)
+      playerNum.toString, "", "", null, List(Item("Starter Bow", "Emblazoned on the front:'Nerf or Nothing'",1)), sock, in, out)), playerNum.toString)
 
 
     println("character creation done in player manager")
@@ -52,7 +56,7 @@ object PlayerManager {
   case class AddPlayer(sock: Socket, in: BufferedReader, out: PrintStream)
   case object CheckInput
   case class GlobalChat(msg: String, sentby: String)
-  case class SingleChat(msg: String, sentby: String, sentto: String)
+  case class Tell(sentby: String, sentto: String, msg: String)
   case class PlayerDone(player:ActorRef,name:String)
   case class Check(msg:String)
 

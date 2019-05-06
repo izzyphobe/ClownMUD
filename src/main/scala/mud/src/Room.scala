@@ -30,6 +30,8 @@ case class Room(val name: String, val description: String, var items: List[Item]
       }else {
         sender ! Player.TakeExit(None)
       }
+    case ActorLeaves(name)=>
+      for(i<-players) i._2 ! Player.GetChat(name+" leaves the room.")
     case GetItem(itemName, send) =>
       var it = items.find(item => item.name.toLowerCase == itemName.toLowerCase)
       send ! Player.TakeItem(it)
@@ -60,6 +62,10 @@ case class Room(val name: String, val description: String, var items: List[Item]
         }
       }
       sender ! Player.StartAttack(ret)
+    case PlayerDies(player)=>
+      var removed=players.filter(_._2==player).keys.toList(0)
+       players=players.filterNot(_._2==player)
+       for (i<-players)i._2 ! Player.GetChat(removed+" has died!")
     case m => println("no! " + m)
   }
 
@@ -80,7 +86,10 @@ case class Room(val name: String, val description: String, var items: List[Item]
       toprint += ("\n\nThere are no items in the room.\n\n")
     }
 
-    toprint+"You see the following exits: \n"+exitlist
+    toprint=toprint+"You see the following exits: \n"+exitlist+"\n\n"
+    toprint=toprint+"The following players are in the room: \n"
+    for(i<-players) toprint=toprint+i._1+"\n"
+    toprint
   }
 
   def exitnames: String = {
@@ -116,5 +125,7 @@ object Room {
   case class ActorEnters(name: String, player: ActorRef)
   case class Chat(sender: String, message: String)
   case class ScanTarget(target: String)
+  case class PlayerDies(player: ActorRef)
+  case class ActorLeaves(name:String)
 
 }

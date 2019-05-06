@@ -18,8 +18,10 @@ case class NPC(val hostile:Boolean,var location:ActorRef,val name:String,val max
     case Player.TakeDamage(power,attacker)=>
       if(target==None) target=Some(attacker)
       HP=HP-(power/(defense/2))
+      target.get ! Player.GetChat(name+" takes "+power/(defense/2)+" points of damage!")
     case Update=>
-      if(target!=None) Main.activityManage ! ActivityManager.Schedule(Activity(4000,target.get,Player.TakeDamage(strength,self)))
+      if(target!=None) 
+      if(HP<=0) location ! Room.PlayerDies(self)
     case m => println("oopsie in npc: "+m+"\nnpc name: "+name+" sent by: "+sender)
     
   }
@@ -29,13 +31,18 @@ case class NPC(val hostile:Boolean,var location:ActorRef,val name:String,val max
   val timer = new Timer
   val task = new TimerTask {
     def run() = {
+      
       if (target != None) {
-        Main.activityManage ! ActivityManager.Schedule(Activity(4000, target.get, Player.TakeDamage(strength, self)))
+        t += 1
+        if(t>=3){
+          Main.activityManage ! ActivityManager.Schedule(Activity(1000,target.get,Player.TakeDamage(strength,self)))
+          t=0
+        }
       }
     }
     run()
   }
-  timer.scheduleAtFixedRate(task, 0, 30)
+  timer.scheduleAtFixedRate(task, 0, 1000)
 
 }
 
@@ -51,9 +58,9 @@ class NPCManager extends Actor{
   var n=0
   import NPCManager._
   def receive={
-    case MakeNPC(hostile:Boolean,location,name,maxHP,strength,defense)=>
+    case MakeNPC(moves:Boolean,location,name,maxHP,strength,defense)=>
       
-      var act=context.actorOf(Props(NPC(hostile,location,name,maxHP,strength,defense)),n.toString)
+      var act=context.actorOf(Props(NPC(moves,location,name,maxHP,strength,defense)),n.toString)
       location ! Room.ActorEnters(name,act)
       n+=1
     case Update=>
@@ -66,7 +73,7 @@ class NPCManager extends Actor{
 }
 
 object NPCManager{
-  case class MakeNPC(hostile:Boolean,location:ActorRef,name:String,maxHP:Int,strength:Int,defense:Int)
+  case class MakeNPC(moves:Boolean,location:ActorRef,name:String,maxHP:Int,strength:Int,defense:Int)
   case object Update
   
 }

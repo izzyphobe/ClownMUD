@@ -7,6 +7,7 @@ import java.io.PrintStream
 import java.net.Socket
 import java.util.Timer
 import java.util.TimerTask
+import scala.util.Random
 
 class Player(
   val id: String,
@@ -20,19 +21,23 @@ class Player(
   import Player._
 
   import PlayerManager._
-  val helpMsg = "COMMANDS: \n \n n, s, e, w, u, d - moves player \n  look - reprints description of current room \n inv - lists current inventory \n get [item] - grab item from the room and add to your inventory \n drop [item] - drops an item from your inventory and puts it in the room \n say - sends a messsage globally \n exit - exits the game. Your data will not be saved. It is worth nothing."
+  var helpMsg = "-------------COMMANDS------------- \n \n n, s, e, w, u, d - moves player \n  look - reprints description of current room \n"
+  helpMsg += "inv - lists current inventory \n get [item] - grab item from the room and add to your inventory \n drop [item] - drops an item from your inventory and puts it in the room \n"
+  helpMsg += "tell [player] [message] -  whisper message to a player \n say [message] - say something to the room \n kill [player] - engage in combat with a player \n flee - ends combat \n"
+  helpMsg += "equip [item name] - equips an item in your inventory"
   def receive = {
     case TakeExit(optRoom) =>
       if (optRoom != None) {
+        location ! Room.ActorLeaves(name)
         location = optRoom.get
         location ! Room.ActorEnters(name, self)
       } else out.println("There is no exit that way!")
-      if (target != None){
+      if (target != None) {
         target.get ! StopCombat
-         target=None
+        target = None
 
       }
-     
+
     case TakeItem(item) =>
       if (item == None) out.println("This room does not have that item in it!")
       else {
@@ -44,10 +49,12 @@ class Player(
       println("room given")
       createPlayer
     case ProcessInput =>
+
       if (in.ready()) {
         var cmd = in.readLine
         parseCommand(cmd, id)
       }
+
     case SendExit(name) =>
       out.println(name.toString())
     case GetDescription(desc) =>
@@ -57,7 +64,7 @@ class Player(
     case ChangeDescription(desc) =>
       roomdesc = desc
     case StopCombat =>
-      out.println("You stopped combat.")
+      out.println("You stopped combat. You or your target fled!")
       target = None
     case StartAttack(toattack) =>
       if (toattack == None) out.println("That player is not in the room!")
@@ -71,10 +78,11 @@ class Player(
         out.println("You died of fisticuffs. I guess clown college just isn't for you, " + name + "!")
         sock.close
       }
-      
+
       if (target == None) target = Some(attacker)
       HP = HP - (power / (defense / 2))
-      out.println("You took "+(power / (defense / 2))+" points of damage.\nYour health is now at "+HP+"/"+maxHP)
+      out.println("You took " + (power / (defense / 2)) + " points of damage.\nYour health is now at " + HP + "/" + maxHP)
+      target.get ! Player.GetChat(name + " takes " + power / (defense / 2) + " points of damage!")
     case m =>
       println("uh oh whoopsie " + m)
 
@@ -88,7 +96,12 @@ class Player(
   def parseCommand(cmd: String, sender: String): Unit = {
     out.println("\n")
     if (cmd == "s" || cmd == "n" || cmd == "e" || cmd == "w" || cmd == "u" || cmd == "d") {
-      move(cmd, sender)
+      if (target == Some) out.println("You have to flee before you can move!")
+      else {
+        out.println("You leave the room.")
+        move(cmd, sender)
+      }
+
     } else if (cmd == "look") {
       location ! Room.GetDescription(self)
       Thread.sleep(20)
@@ -101,10 +114,10 @@ class Player(
       location ! Room.GetItem(toGet(0), context.self)
     } else if (cmd.startsWith("drop")) {
       var toDrop = splitFirst(cmd, ("p "))(0).toLowerCase
-      var it = inventory.filter(_.name.toLowerCase == toDrop)
+      var it = inventory.filter(_.name.toLowerCase == toDrop.toLowerCase)
       if (it.length > 0) {
         location ! Room.DropItem(it(0))
-        inventory = inventory.filterNot(_.name.toLowerCase == toDrop)
+        inventory = inventory.filterNot(_.name.toLowerCase == toDrop.toLowerCase)
         Thread.sleep(20)
         out.println("You dropped your " + toDrop)
       } else out.println("You do not have that item!")
@@ -120,10 +133,28 @@ class Player(
     } else if (cmd.startsWith("flee")) {
       if (target != None) {
         target.get ! StopCombat
-        out.println("You stopped fighting. Coward.")
+        val directions=Array("n","s","e","w")
+        out.println("You try to move in a random direction!")
+        location ! Room.GetExit(directions(Random.nextInt(4)))
       } else out.println("You aren't fighting anyone!")
-      target = None
+      
 
+    } else if (cmd.startsWith("equip")) {
+      var toEquip = inventory.filterNot(_.name.toLowerCase == cmd.slice(5, cmd.length).toLowerCase)
+      if (toEquip.length < 1) out.println("You don't have that item, you can't equip it!")
+      else {
+        if (equipped != None) out.println("You unequip your " + equipped.get.name + " and equip your " + toEquip(0).name)
+        else out.println("You equip your " + toEquip(0).name)
+        equipped = Some(toEquip(0))
+        strength += equipped.get.strength
+        defense += equipped.get.strength
+        out.println("Your strength is now " + strength)
+      }
+    } else if (cmd.startsWith("tell")) {
+      var end = cmd.split(" ").tail
+      var toTell = end(0)
+      var message = end.tail.mkString(" ")
+      context.parent ! PlayerManager.Tell(name, toTell, message)
     } else {
       out.println("Invalid command! Type 'help' for a list of all available commands.")
     }
@@ -133,6 +164,7 @@ class Player(
   var defense = 10
   var maxHP = 100
   var target: Option[ActorRef] = None
+  var equipped: Option[Item] = None
   var strength = 7
   var HP = maxHP
 
@@ -165,13 +197,19 @@ class Player(
   val timer = new Timer
   val task = new TimerTask {
     def run() = {
+
       if (target != None) {
-        Main.activityManage ! ActivityManager.Schedule(Activity(4000, target.get, Player.TakeDamage(strength, self)))
+        t += 1
+        if (t >= 3) {
+          Main.activityManage ! ActivityManager.Schedule(Activity(1000, target.get, Player.TakeDamage(strength, self)))
+          t = 0
+        }
       }
+      println(t)
     }
     run()
   }
-  timer.scheduleAtFixedRate(task, 0, 400000)
+  timer.scheduleAtFixedRate(task, 0, 1000)
 
 }
 object Player {

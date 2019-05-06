@@ -3,7 +3,7 @@
 	<room id="Honksley_Hall" name="Honksley Hall">
 		<desc>The hub of all student activity. Students are bustling to get to their next Glass (Goofy Class).</desc>
 		<items>
-			<item name="Red Nose" desc="Someone dropped their nose. Oh well, finders keepers, amirite?"/>
+			<item name="Red Nose" desc="Someone dropped their nose. Oh well, finders keepers, amirite?" strength="2"/>
 		</items>
 		
 			<exit room="Computer_Lab" direction="n"/>
@@ -17,7 +17,7 @@
 		<desc>Millions of computers are lined up. Millions. Clown college has gotten more and more popular</desc>
 		<items>
 			<item name="Crumpled up gum wrapper" desc="Smells like juicy fruit. Mmm..."/>
-			<item name="Floppy disk" desc="Who put this here? Was this someone's idea of a joke? This may be clown college, but that is NOT funny."/>
+			<item name="Floppy disk" desc="Who put this here? Was this someone's idea of a joke? This may be clown college, but that is NOT funny." strength="3"/>
 			<item name="A copy of E.T. for the Atari 2600" desc="Based on the film of the same name. Released in 1982 never to be seen again."/>
 		</items>
 		
@@ -39,7 +39,7 @@
 	<room id="Bathroom" name="Bathroom">
 		<desc>The stalls are arranged in a circle. In the center, there are ten sinks, each a different color of the rainbow. Carousel music is playing. After a few seconds, you realize the whole room is spinning.</desc>
 		<items>
-			<item name="Broken hacky sack" desc="Its innards are leaking out."/>
+			<item name="Broken hacky sack" desc="Its innards are leaking out." strength="3"/>
 			
 		</items>
 		
@@ -51,7 +51,7 @@
 	<room id="Biology_Lab" name="Biology Lab">
 		<desc>The stench of Clown Biology fills the air. These Clown Biology majors are clownier than you'll ever be. You wonder if you really belong here.</desc>
 		<items>
-			<item name="Clown skeleton" desc="You didn't realize clown skeletons looked different than human ones. Apparently they do."/>
+			<item name="Clown skeleton" desc="You didn't realize clown skeletons looked different than human ones. Apparently they do." strength="5"/>
 			<item name="Educational poster" desc="It says 'CLOWN REPRODUCTION' in huge letters. The diagram depicts a pie being hurled at a clown, along with an equation tracking the trajcetory of the pie. Who knew biology had so much calculus?"/>
 			
 		</items>
@@ -63,8 +63,8 @@
 	<room id="Jesters_Courtyard" name="Jester's Courtyard">
 		<desc>It's cold outside. It makes your clown makeup itch a lot. This must be the main outside area - clowns are walking and running and hand-walking and hand-running and headstanding and juggling and brandishing pies everywhere. You realize this might be the right place for you after all.</desc>
 		<items>
-			<item name="Banjo" desc="Someone left their banjo. It looks expensive."/>
-			<item name="Custard pie" desc="A classic."/>
+			<item name="Banjo" desc="Someone left their banjo. It looks expensive." strength="7"/>
+			<item name="Custard pie" desc="A classic." strength="3"/>
 		</items>
 		
 			<exit room="Honksley_Hall" direction="e"/>
@@ -96,9 +96,9 @@
 	</room>
 	
 	<room id="CCU_3" name="Clown Containment Units, 3rd Floor">
-		<desc>You take the elevator up. These doors... They're metal, and spaced only one foot apart. This isn't right... This isn't right at all...</desc>
+		<desc>You take the elevator up. These doors... They're metal, and spaced only one foot apart. This isn't right... This isn't right at all... There's a goth clown sitting in the corner of the room reading.</desc>
 		<items>
-			<item name="Piece of broken glass" desc="There's some custard on it... Something horrible has happened here."/>
+			<item name="Piece of broken glass" desc="There's some custard on it... Something horrible has happened here." strength="7"/>
 		</items>
 		
 			<exit room="CCU_2" direction="d"/>

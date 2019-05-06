@@ -4,6 +4,7 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import scala.reflect.ClassTag
 
+//linked list priority queue
 class PriorityQueue[A](higherP: (A, A) => Boolean) { 
   private var default:A = _
   case class Node(val data: A, var prev: Node, var next: Node)  
