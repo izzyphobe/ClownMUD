@@ -24,7 +24,8 @@ class Player(
   var helpMsg = "-------------COMMANDS------------- \n \n n, s, e, w, u, d - moves player \n  look - reprints description of current room \n"
   helpMsg += "inv - lists current inventory \n get [item] - grab item from the room and add to your inventory \n drop [item] - drops an item from your inventory and puts it in the room \n"
   helpMsg += "tell [player] [message] -  whisper message to a player \n say [message] - say something to the room \n kill [player] - engage in combat with a player \n flee - ends combat \n"
-  helpMsg += "equip [item name] - equips an item in your inventory"
+  helpMsg += "equip [item name] - equips an item in your inventory \n nav [room] - get a path to another room"
+  val roomsList="Honksley_Hall\nComputer_Lab\nDarkened_Hallway\nBathroom\nBiology_Lab\nJesters_Courtyard\nCCU_1\nCCU_2\nCCU_3\nYour_Dorm\n\n"
   def receive = {
     case TakeExit(optRoom) =>
       if (optRoom != None) {
@@ -140,10 +141,13 @@ class Player(
       
 
     } else if (cmd.startsWith("equip")) {
-      var toEquip = inventory.filterNot(_.name.toLowerCase == cmd.slice(5, cmd.length).toLowerCase)
+      var toEquip = inventory.filter(_.name.toLowerCase.contains( cmd.slice(6, cmd.length).toLowerCase))
       if (toEquip.length < 1) out.println("You don't have that item, you can't equip it!")
       else {
-        if (equipped != None) out.println("You unequip your " + equipped.get.name + " and equip your " + toEquip(0).name)
+        if (equipped != None){
+          out.println("You unequip your " + equipped.get.name + " and equip your " + toEquip(0).name)
+          strength-=equipped.get.strength
+        }
         else out.println("You equip your " + toEquip(0).name)
         equipped = Some(toEquip(0))
         strength += equipped.get.strength
@@ -155,7 +159,12 @@ class Player(
       var toTell = end(0)
       var message = end.tail.mkString(" ")
       context.parent ! PlayerManager.Tell(name, toTell, message)
-    } else {
+    } else if (cmd.startsWith("nav")){
+      Main.roomManage ! RoomManager.StartShortestPath(self,location,cmd.split(" ").tail(0))
+    }else if(cmd.startsWith("map")){
+      out.println(roomsList)
+    }
+    else {
       out.println("Invalid command! Type 'help' for a list of all available commands.")
     }
   }
@@ -205,7 +214,7 @@ class Player(
           t = 0
         }
       }
-      println(t)
+
     }
     run()
   }
